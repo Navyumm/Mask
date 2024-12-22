@@ -6,7 +6,10 @@ const Login = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoadingGuest, setIsLoadingGuest] = useState(false); // Loader state
   const apiUrl = import.meta.env.VITE_API_URL;
+
+  console.log("connected api: ", apiUrl);
 
   useEffect(() => {
     if (errorMessage) {
@@ -49,6 +52,7 @@ const Login = () => {
 
   const loginGuest = async (e) => {
     e.preventDefault();
+    setIsLoadingGuest(true); // Set loading to true
     const data = await fetch(`${apiUrl}/guest_login`, {
       method: "POST",
       headers: {
@@ -57,8 +61,8 @@ const Login = () => {
     });
     const response = await data.json();
     localStorage.setItem("token", response.token);
-    // console.log(response);
     localStorage.setItem("isGuest", "true");
+    setIsLoadingGuest(false); // Set loading to false
     if (response.message === "Guest login successful") {
       navigate("/home");
     } else {
@@ -131,9 +135,12 @@ const Login = () => {
         </button>
         <button
           onClick={loginGuest}
-          className="w-full bg-blue-800 text-white my-4 rounded py-2 px-4 hover:bg-blue-600 transition duration-300"
+          disabled={isLoadingGuest}
+          className={`w-full ${
+            isLoadingGuest ? "bg-gray-600 cursor-not-allowed" : "bg-blue-800"
+          } text-white my-4 rounded py-2 px-4 hover:bg-blue-600 transition duration-300`}
         >
-          Login as Guest
+          {isLoadingGuest ? "Logging in..." : "Login as Guest"}
         </button>
         <a
           className="mt-5 hover:underline hover:text-blue-900"
